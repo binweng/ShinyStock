@@ -3,7 +3,14 @@ rm(list = ls()) # clear environment
 cat("\014") # clear console
 setwd("/Users/binweng/Desktop/Shinystock")
 
-#Load the library
+# Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
+library(caret);
+library(fscaret);
+library(neuralnet);
+library(kernlab);
+library(gmodels);
+library(C50);
+library(nnet);
 
 library(quantmod)
 library(TTR)
@@ -286,3 +293,30 @@ fulldata$Target <- NULL
 fulldata <- cbind(fulldata,Target)
 
 str(fulldata)
+
+
+#__________________________Apple the Model SVM_T2_________________________
+# Please refer to the paper
+fulldata <- fulldata[,2:ncol(fulldata)]
+
+# Create the training and testing data sets
+splitIndex <- createDataPartition(fulldata$Target, p = .9, list = FALSE, times = 1)
+trainDF <- fulldata[splitIndex,]
+testDF <- fulldata[-splitIndex,]
+
+# Create the model
+svm.model <- ksvm(Target ~., data = trainDF, kernel = "polydot", C=9)
+print(svm.model)
+
+#Evaluating model performance
+svm.predict <- predict(svm.model,testDF)
+table(svm.predict,testDF$Target)
+
+
+
+
+
+
+
+
+
