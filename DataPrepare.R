@@ -20,7 +20,7 @@ library(rPython)
 #____________________________Input Box______________________________________________
 
 # Get the input, stock ticker and date range
-stock <- "AAPL"
+stock <- "FB"
 terms <- c("iPhone","iPad","Macbook")
 date_begin <- "1/1/2013"
 date_end <- "1/1/2016"
@@ -44,15 +44,15 @@ Input_vars = c("Open_Price","Close_Price","High_Price","Low_Price",
 
 # Get the market data
 
-getSymbols(stock, from=date_begin_m, to = date_end_m, src="yahoo")
-
+stockData = as.data.frame(getSymbols(stock, from=date_begin_m, to = date_end_m, src="yahoo", env = NULL))
+getSymbols("AAPL", from=date_begin_m, to = date_end_m, src="yahoo")
 # Create the date list
 
-date_market <- data.frame(index(AAPL))   # ??? Change to data frame
+date_market <- data.frame(index(AAPL))   #Change to data frame
 
 # Get Open_Price, Close_Price, High_Price, Low_Price
 
-data_from_yahoo <- AAPL # ? How to change this using input ???? try noquote(stock), not working
+data_from_yahoo <- stockData # 
 
 adjust_coff <- data_from_yahoo[,4]/data_from_yahoo[,6]  # Get the adjust index
 Open_Price <- data_from_yahoo[,1]/adjust_coff   # Get the adjusted value based on index, similar below
@@ -76,6 +76,7 @@ RSI_Move <- diff(the_RSI)       #Get the difference as previous day
 RSI_Move[RSI_Move<0] <- 0       # 0 means going down
 RSI_Move[RSI_Move>0] <- 1       # 1 means going up
 RSI_Move <- data.frame(RSI_Move)  # Transfer to data frame
+RSI_Move <- rbind("N/A",RSI_Move) # Move down for one row
 
 #_______________________Temporary full data_________________________________
 
@@ -90,8 +91,10 @@ colnames(fulldata_temp) <- c("Date","Open","Close","High","Low","Stochastic Osci
 # Based on Target 2: O(i+1) - O(i)
 
 Target <- diff(Open_Price)
-Target_temp <- Target[2:length(Target),]
-Target <- rbind.data.frame(Target_temp,"NA")
+temp = rep(NA, length(Target) + 1)
+temp[1:length(Target)] = Target
+Target = data.frame(temp)
+
 colnames(Target) <- "Target"
 
 Target[Target<0] <- 0       # 0 means going down
@@ -113,9 +116,9 @@ term_count <- length(terms) +1
 Wiki_traffic <- colSums(matrix(Wiki_traffic_ALL$count, nrow = term_count)) # Take the sum by each day for all search terms
 Wiki_traffic_date <- colSums(matrix(Wiki_traffic_ALL$date, nrow = term_count)/term_count) # Collect related date. To check the 
                                                                                           # date, use as.Date()
-Wiki_traffic_with_date <- data.frame(Wiki_traffic_date,Wiki_traffic)  # Combine the data
+Wiki_traffic_with_date <- cbind.data.frame(Wiki_traffic_date,Wiki_traffic)  # Combine the data
 
-date_market_compare <- data.matrix(date_market)  # Tranfer from list to double for comparsion
+date_market_compare <-  data.matrix(date_market) # Tranfer from list to double for comparsion
 
 #Compare the seq date with market open date
 date_diff_wiki <- setdiff(Wiki_traffic_with_date$Wiki_traffic_date,date_market_compare) 
