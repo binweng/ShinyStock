@@ -1,34 +1,54 @@
 setwd('D:\\@Auburn\\2016Spring\\INSY7970_DataVisualization\\projects\\ShinyStock')
 #_______________________________Required Libraries_______________________________________________________________________________________
 # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
-library(quantmod)
-library(TTR)
-library(wikipediatrend)
-library(rPython)
-
-library(caret);
-library(fscaret);
-library(neuralnet);
-library(kernlab);
-library(gmodels);
-library(C50);
-library(nnet);
+pkgs = c("TTR", "quantmod", "wikipediatrend", "rPython",
+         "caret", "fscaret", "neuralnet", "kernlab", "gmodels", "C50", "nnet",
+         "shiny")
+for (p in pkgs) {
+    if (! require(p, character.only = TRUE)) {
+        install.packages(p)
+        require(p, character.only = TRUE)
+  }
+}
+#library(quantmod)
+#library(TTR)
+#library(wikipediatrend)
+# library(rPython)
+# 
+# library(caret);
+# library(fscaret);
+# library(neuralnet);
+# library(kernlab);
+# library(gmodels);
+# library(C50);
+# library(nnet);
 
 library(shiny)
 
-ui = fluidPage(
-  titlePanel("Stock Prediction"),
-  sidebarLayout(
-    sidebarPanel(
-      textInput(inputId = "stockName",
+ui = navbarPage("Navbar or whatever!",
+  tabPanel("Stock Prediction",
+    sidebarLayout(
+      sidebarPanel(
+        textInput(inputId = "stockName",
                   label = "Please enter the name of stock:"),
-      submitButton(text = "Submit")
+        submitButton(text = "Submit")
       
-    ),
-    mainPanel(
-      h3(textOutput ("text")),
-      plotOutput("plot")
+      ),
+      mainPanel(
+        h3(textOutput ("text")),
+        plotOutput("plot")
+      )
     )
+  ),
+  tabPanel("Historical Trend",
+           
+  ),
+  navbarMenu("More",
+      tabPanel("more1",
+               
+               
+      )           
+             
   )
 )
 

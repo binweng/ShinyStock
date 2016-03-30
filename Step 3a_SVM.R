@@ -83,5 +83,5 @@ for (i in 1:length(accus)) {
 #max(accu.rbf, accu.linear, accu.poly, accu.tanh)
 #bestmod
 
-lastdayPred <- predict(mod, lastday)
+lastdayPred <- predict(bestmod, lastday)
 lastdayPred
