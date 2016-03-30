@@ -1,29 +1,27 @@
 #_____________________________Initilization________________________________________________________
 rm(list = ls()) # clear environment
-cat("\014") # clear console
-setwd("/Users/binweng/Desktop/Shinystock")
+#cat("\014") # clear console
+#setwd("/Users/binweng/Desktop/Shinystock")
 
+# Install and load any needed packages
 # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
-library(caret);
-library(fscaret);
-library(neuralnet);
-library(kernlab);
-library(gmodels);
-library(C50);
-library(nnet);
-
-library(quantmod)
-library(TTR)
-library(wikipediatrend)
-library(rPython)
+pkgs = c("TTR", "quantmod", "wikipediatrend",
+         "caret", "fscaret", "neuralnet", "kernlab", "gmodels", "C50", "nnet",
+         "shiny")
+for (p in pkgs) {
+    if (! require(p, character.only = TRUE)) {
+        install.packages(p)
+        require(p, character.only = TRUE)
+  }
+}
 
 #____________________________Input Box______________________________________________
 
 # Get the input, stock ticker and date range
-stock <- "FB"
+stock <- "AAPL"
 terms <- c("iPhone","iPad","Macbook")
-date_begin <- "1/1/2013"
-date_end <- "1/1/2016"
+date_begin <- "1/1/2016"
+date_end <- "3/1/2016"
 
 #__________________________Prepare data_____________________________________
 
@@ -33,12 +31,7 @@ date_end_m <- strptime(as.character(date_end), "%m/%d/%Y")
 
 # Define the variables that we are going to use
 
-Input_vars = c("Open_Price","Close_Price","High_Price","Low_Price",
-               "PE_Ratio","Wiki_5day_disparity","Wiki_Move",
-               "Wiki_MA3_Move","Wiki_EMA5_Move","Wiki_5day_disparity_Move",
-               "Google_EMA5_Move","Google_3day_disparity_Move","Google_ROC_Move",
-               "Google_RSI_Move","Wiki_3day_disparity","Stoochastic_Oscillator",
-               "RSI_Move","Wiki_RSI_Move","Google_MA6","Google_Move")
+
 
 #__________________________Pull the market data_____________________________
 
@@ -188,90 +181,90 @@ Wiki_data <- data.frame(Wiki_Move,Wiki_MA3_Move,Wiki_EMA5_Move, Wiki_RSI_Move,Wi
 fulldata_temp <- cbind(fulldata_temp,Wiki_data)
 
 
-#_________________________________Pull Google Data___________________________________
-
-# Load Google Web Scraping google.py
-# Function: getNewsCount (term, begDate, endDate) call this function use python.call
-# python.call("getNewsCount", stock, a[3], date_end)
-
-python.load("google.py")  #Load python function
-
-date_format_google <- format(fulldata_temp$Date,"%m/%d/%Y") #format the date to "01/01/2013"
-
-#Create a dummy vector of zeros
-Google_counts <- rep(0,length(date_format_google))
-
-#Get the google news count by each day
-for (i in 1:length(date_format_google)) {
-  Google_counts[i] = python.call("getNewsCount", stock, date_format_google[i], date_end)
-}
-
-# Combine the date with google counts to double check the data
-Google_counts_with_date <- data.frame(fulldata_temp$Date, Google_counts)
-
-
-#Get Google_EMA5_Move
-Google_counts_market <- as.numeric(gsub(",","",Google_counts))   #Dealing with the 1,234 format to 1234
-Google_EMA_5 <- EMA(Google_counts_market,5)
-
-Google_EMA5_Move <- diff(Google_EMA_5)
-Google_EMA5_Move[Google_EMA5_Move <0] <- 0       # 0 means going down
-Google_EMA5_Move[Google_EMA5_Move >0] <- 1       # 1 means going up
-Google_EMA5_Move <- data.frame(Google_EMA5_Move)
-Google_EMA5_Move <- rbind("N/A",Google_EMA5_Move) # Move down for one row
-
-#Get Google_MA_6
-Google_MA_6 <- SMA(Google_counts_market,6)
-
-#Get Google_Move
-Google_Move <- diff(Google_counts_market)  #Get the difference as previous day
-Google_Move[Google_Move<0] <- 0       # 0 means going down
-Google_Move[Google_Move>0] <- 1       # 1 means going up
-Google_Move <- data.frame(Google_Move) # Transfer to data frame
-Google_Move <- rbind("N/A",Google_Move) # Move down for one row
-
-#Get Google_3day_Disparity_Move
-Google_MA_3 <- SMA(Google_counts_market,3)
-Google_3day_Disparity <- Google_counts_market/Google_MA_3
-Google_3day_Disparity <- as.numeric(unlist(Google_3day_Disparity))
-
-Google_3day_Disparity_Move <- diff(Google_3day_Disparity)
-Google_3day_Disparity_Move[Google_3day_Disparity_Move <0] <- 0       # 0 means going down
-Google_3day_Disparity_Move[Google_3day_Disparity_Move >0] <- 1       # 1 means going up
-Google_3day_Disparity_Move <- data.frame(Google_3day_Disparity_Move)
-Google_3day_Disparity_Move <- rbind("N/A",Google_3day_Disparity_Move) # Move down for one row
-
-#Get Google_RSI_Move
-Google_RSI <- RSI(Google_counts_market)
-
-Google_RSI_Move <- diff(Google_RSI)
-Google_RSI_Move[Google_RSI_Move<0] <- 0       # 0 means going down
-Google_RSI_Move[Google_RSI_Move>0] <- 1       # 1 means going up
-Google_RSI_Move <- data.frame(Google_RSI_Move)
-Google_RSI_Move <- rbind("N/A",Google_RSI_Move) # Move down for one row
-
-#Get Google_ROC_Move
-# Google_Momentum2 <- diff(Google_counts_market,5)*100
-# Google_Momentum2 <- rbind(1,1,1,1,1,data.frame(Google_Momentum2))
-# Google_ROC <- (Google_counts_market/Google_Momentum2)*100
+# #_________________________________Pull Google Data___________________________________
 # 
-# Google_ROC <- as.numeric(unlist(Google_ROC))
-
-Google_ROC <- ROC(Google_counts_market,n=5) * 100
-
-Google_ROC_Move <- diff(Google_ROC)
-Google_ROC_Move[Google_ROC_Move<0] <- 0       # 0 means going down
-Google_ROC_Move[Google_ROC_Move>0] <- 1       # 1 means going up
-Google_ROC_Move <- data.frame(Google_ROC_Move)
-Google_ROC_Move <- rbind("N/A",Google_ROC_Move) # Move down for one row
-
-#___________________Temporary full data after Wiki and Google_________________________________
-
-# Dealing with the missing data point after wiki
-Google_data <- data.frame(Google_EMA5_Move,Google_MA_6,Google_Move,
-                          Google_3day_Disparity_Move,Google_RSI_Move,
-                          Google_ROC_Move)
-fulldata_temp <- cbind(fulldata_temp,Google_data)
+# # Load Google Web Scraping google.py
+# # Function: getNewsCount (term, begDate, endDate) call this function use python.call
+# # python.call("getNewsCount", stock, a[3], date_end)
+# 
+# python.load("google.py")  #Load python function
+# 
+# date_format_google <- format(fulldata_temp$Date,"%m/%d/%Y") #format the date to "01/01/2013"
+# 
+# #Create a dummy vector of zeros
+# Google_counts <- rep(0,length(date_format_google))
+# 
+# #Get the google news count by each day
+# for (i in 1:length(date_format_google)) {
+#   Google_counts[i] = python.call("getNewsCount", stock, date_format_google[i], date_end)
+# }
+# 
+# # Combine the date with google counts to double check the data
+# Google_counts_with_date <- data.frame(fulldata_temp$Date, Google_counts)
+# 
+# 
+# #Get Google_EMA5_Move
+# Google_counts_market <- as.numeric(gsub(",","",Google_counts))   #Dealing with the 1,234 format to 1234
+# Google_EMA_5 <- EMA(Google_counts_market,5)
+# 
+# Google_EMA5_Move <- diff(Google_EMA_5)
+# Google_EMA5_Move[Google_EMA5_Move <0] <- 0       # 0 means going down
+# Google_EMA5_Move[Google_EMA5_Move >0] <- 1       # 1 means going up
+# Google_EMA5_Move <- data.frame(Google_EMA5_Move)
+# Google_EMA5_Move <- rbind("N/A",Google_EMA5_Move) # Move down for one row
+# 
+# #Get Google_MA_6
+# Google_MA_6 <- SMA(Google_counts_market,6)
+# 
+# #Get Google_Move
+# Google_Move <- diff(Google_counts_market)  #Get the difference as previous day
+# Google_Move[Google_Move<0] <- 0       # 0 means going down
+# Google_Move[Google_Move>0] <- 1       # 1 means going up
+# Google_Move <- data.frame(Google_Move) # Transfer to data frame
+# Google_Move <- rbind("N/A",Google_Move) # Move down for one row
+# 
+# #Get Google_3day_Disparity_Move
+# Google_MA_3 <- SMA(Google_counts_market,3)
+# Google_3day_Disparity <- Google_counts_market/Google_MA_3
+# Google_3day_Disparity <- as.numeric(unlist(Google_3day_Disparity))
+# 
+# Google_3day_Disparity_Move <- diff(Google_3day_Disparity)
+# Google_3day_Disparity_Move[Google_3day_Disparity_Move <0] <- 0       # 0 means going down
+# Google_3day_Disparity_Move[Google_3day_Disparity_Move >0] <- 1       # 1 means going up
+# Google_3day_Disparity_Move <- data.frame(Google_3day_Disparity_Move)
+# Google_3day_Disparity_Move <- rbind("N/A",Google_3day_Disparity_Move) # Move down for one row
+# 
+# #Get Google_RSI_Move
+# Google_RSI <- RSI(Google_counts_market)
+# 
+# Google_RSI_Move <- diff(Google_RSI)
+# Google_RSI_Move[Google_RSI_Move<0] <- 0       # 0 means going down
+# Google_RSI_Move[Google_RSI_Move>0] <- 1       # 1 means going up
+# Google_RSI_Move <- data.frame(Google_RSI_Move)
+# Google_RSI_Move <- rbind("N/A",Google_RSI_Move) # Move down for one row
+# 
+# #Get Google_ROC_Move
+# # Google_Momentum2 <- diff(Google_counts_market,5)*100
+# # Google_Momentum2 <- rbind(1,1,1,1,1,data.frame(Google_Momentum2))
+# # Google_ROC <- (Google_counts_market/Google_Momentum2)*100
+# # 
+# # Google_ROC <- as.numeric(unlist(Google_ROC))
+# 
+# Google_ROC <- ROC(Google_counts_market,n=5) * 100
+# 
+# Google_ROC_Move <- diff(Google_ROC)
+# Google_ROC_Move[Google_ROC_Move<0] <- 0       # 0 means going down
+# Google_ROC_Move[Google_ROC_Move>0] <- 1       # 1 means going up
+# Google_ROC_Move <- data.frame(Google_ROC_Move)
+# Google_ROC_Move <- rbind("N/A",Google_ROC_Move) # Move down for one row
+# 
+# #___________________Temporary full data after Wiki and Google_________________________________
+# 
+# # Dealing with the missing data point after wiki
+# Google_data <- data.frame(Google_EMA5_Move,Google_MA_6,Google_Move,
+#                           Google_3day_Disparity_Move,Google_RSI_Move,
+#                           Google_ROC_Move)
+# fulldata_temp <- cbind(fulldata_temp,Google_data)
 
 
 
@@ -313,7 +306,7 @@ print(svm.model)
 
 #Evaluating model performance
 svm.predict <- predict(svm.model,testDF)
-table(svm.predict,testDF$Target)
+#table(svm.predict,testDF$Target)
 
 
 
