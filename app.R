@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 setwd("/Users/binweng/Desktop/Shinystock")
 
 #___________________________Required Libraries_______________________________________________________________________________________
+=======
+setwd('D:\\@Auburn\\2016Spring\\INSY7970_DataVisualization\\projects\\ShinyStock')
+#_______________________________Required Libraries_______________________________________________________________________________________
+>>>>>>> d715def97a2c20f4483a3c42ad5cc8cd67469268
 # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
 library(quantmod)
 library(TTR)
@@ -382,7 +387,11 @@ server = function(input, output) {
   #max(accu.rbf, accu.linear, accu.poly, accu.tanh)
   #bestmod
   
+<<<<<<< HEAD
   lastdayPred <- predict(bestmod, lastday)
+=======
+  lastdayPred <- predict(mod, lastday)
+>>>>>>> d715def97a2c20f4483a3c42ad5cc8cd67469268
   
   if (lastdayPred == 0)
     output$text = renderText("Going down")

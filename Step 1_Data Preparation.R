@@ -3,7 +3,7 @@
 #_____________________________Initilization________________________________________________________
 rm(list = ls()) # clear environment
 cat("\014") # clear console
-setwd("/Users/binweng/Dropbox/Bin - Research/Expert Systems With Applicaiton/Trials/R Code")
+setwd('D:/@Auburn/2016Spring/INSY7970_DataVisualization/projects/shinyStock')
 
 #_______________________________Required Libraries_______________________________________________________________________________________
 # Install any needed package with the following command: install.packages("Name", dependencies = c("Depends", "Suggests"))
@@ -17,7 +17,7 @@ library(nnet);
 
 
 #__________________________Read the dataset____________________________________________
-fulldata <- read.csv("/Users/binweng/Dropbox/Bin - Research/Expert Systems With Applicaiton/Trials/R Code/Dataset_R_CSV.csv", header = T, sep = ",")
+fulldata <- read.csv("./Dataset_R_CSV.csv", header = T, sep = ",")
 str(fulldata)  # report summaries of each of the data attributes
 head(fulldata) # returns the first few rows of the data so we can see how it looks like
 names(fulldata) # returns the names of each variable
@@ -33,3 +33,5 @@ int_col_names <- names(int_data)
 non_int_data <- fulldata[, -which(names(fulldata) %in% int_col_names)]
 fulldata <- cbind(non_int_data,int_data)
 str(fulldata)
+dim(fulldata)
+
