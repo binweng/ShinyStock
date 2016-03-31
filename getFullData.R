@@ -6,7 +6,7 @@ Input_vars = c("Open_Price","Close_Price","High_Price","Low_Price",
                "RSI_Move","Wiki_RSI_Move","Google_MA6","Google_Move")
 #__________________________Pull the market data_____________________________
 # Get the market data
-getPred = function(yahooData, wikiData, term_count) {
+getFullData = function(yahooData, wikiData, term_count) {
     #date_begin_m <- strptime(as.character(date_begin), "%m/%d/%Y")
     #date_end_m <- strptime(as.character(date_end), "%m/%d/%Y")
     
@@ -172,10 +172,11 @@ getPred = function(yahooData, wikiData, term_count) {
     fulldata <- cbind(fulldata,Target)
     #return(fulldata)
     
-    numRows = dim(fulldata)[1]
-    lastday = fulldata[numRows, ] 
-    fulldata = fulldata[1:numRows-1, ]
-    
+
+    return(fulldata)
+}    
+
+modTrain = function(fulldata) {
     # Create the training and testing data sets
     set.seed(123)
     splitIndex <- createDataPartition(fulldata$Target, p = .9, list = FALSE, times = 1)
@@ -208,7 +209,6 @@ getPred = function(yahooData, wikiData, term_count) {
     #table(svm.confusion.tanh,trainDF$Target)
     
     # get the predicted values for each model
-    
     svm.predict.rbf <- predict(svm.model.rbf,testDF)
     svm.predict.linear <-  predict(svm.model.linear,testDF)
     svm.predict.poly <-  predict(svm.model.poly,testDF)
@@ -246,15 +246,15 @@ getPred = function(yahooData, wikiData, term_count) {
             bestmod = kernels[i][[1]]
     }
     #max(accu.rbf, accu.linear, accu.poly, accu.tanh)
-    print(bestmod)
+    #print(bestmod)
+    return(bestmod)
+}    
+#     
+#     if (lastdayPred == 0)
+#         return("Going down")
+#     else
+#         return("Going up")
     
-    lastdayPred <- predict(bestmod, lastday)
-    
-    if (lastdayPred == 0)
-        return("Going down")
-    else
-        return("Going up")
-    
-}
+#}
 
 
