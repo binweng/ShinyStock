@@ -50,13 +50,13 @@ shinyServer(function(input, output, session) {
     output$result = renderPrint({
         getPred(yahooData(), wikiData(), term_count())
     })
-    
-    output$paper1pdf <- renderUI({
-        PDFfile="./paper1.pdf"
-        tags$iframe(
-            src=PDFfile,
-            width="100%"),
-            height="800px")
-    })
-    
+#     
+#     output$paper1pdf <- renderUI({
+#         PDFfile="./paper1.pdf"
+#         tags$iframe(
+#             src=PDFfile,
+#             width="100%"),
+#             height="800px")
+#     })
+#     
 })
