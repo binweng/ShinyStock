@@ -8,7 +8,7 @@ for (p in pkgs) {
     library(p, character.only = TRUE)
 }
 
-source("getFullData.R")
+#source("getFullData.R")
 source("modTrain.R")
 source("helpers.R")
 
@@ -50,4 +50,13 @@ shinyServer(function(input, output, session) {
     output$result = renderPrint({
         getPred(yahooData(), wikiData(), term_count())
     })
+    
+    output$paper1pdf <- renderUI({
+        PDFfile="./paper1.pdf"
+        tags$iframe(
+            src=PDFfile,
+            width="100%"),
+            height="800px")
+    })
+    
 })

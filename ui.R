@@ -34,8 +34,11 @@ shinyUI(navbarPage("Stock Market Trend Prediction and Analysis Tool",
                 verbatimTextOutput("wikiSummary")         
             ),
         navbarMenu("More",
-            tabPanel("more1",
-                includeMarkdown("haha.md")
+            tabPanel("bin's paper",
+                basicPage(
+                    uiOutput("paper1pdf")
+                )
+                #includeMarkdown("haha.md")
             ),
             tabPanel("more2",
                 includeMarkdown("haha2.md")
