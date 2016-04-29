@@ -2,6 +2,9 @@
 library(markdown)
 
 shinyUI(navbarPage("Stock Market Trend Prediction and Analysis Tool",
+            tabPanel("Introduction",
+                    includeMarkdown("abstract.md")
+            ),       
             tabPanel("Stock Prediction",
                 sidebarLayout(
                     sidebarPanel(
@@ -32,11 +35,6 @@ shinyUI(navbarPage("Stock Market Trend Prediction and Analysis Tool",
                 verbatimTextOutput("fullSummary"),       
                 plotOutput("wikiPlot"),
                 verbatimTextOutput("wikiSummary")         
-            ),
-        navbarMenu("More",
-            tabPanel("Introduction",
-                includeMarkdown("abstract.md")
             )
-        )
     )
 )

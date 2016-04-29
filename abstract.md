@@ -17,8 +17,3 @@
 6. *Analyze short-term stock/return returns.
 
 7. *Features going to be added.
-
-
-![Alt](/nn.png "nn")
-
-![Alt](/svm.png "svm")
